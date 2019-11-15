@@ -1,0 +1,29 @@
+ion-card {
+    ion-card-content {
+        .picture {
+            .center {
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
+                width: 100%;
+            }
+        }
+        .takepicture {
+            display: block;
+            margin-left: auto;
+            // margin-right: auto;
+            // width: 100%;
+        }
+    }
+}
+
+// ion-card {
+//     ion-card-content {
+//         .center {
+//             display: block;
+//             margin-left: auto;
+//             margin-right: auto;
+//             width: 100%;
+//         }
+//     }
+// }

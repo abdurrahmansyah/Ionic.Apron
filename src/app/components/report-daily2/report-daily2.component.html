@@ -1,0 +1,41 @@
+<hr width="90%">
+
+<ion-grid style="width: 90%" no-padding>
+  <ion-row no-padding align-items-center>
+    <ion-col size="2" no-padding style="text-align: left">
+      <ion-icon name="card" style="font-size: 50px; vertical-align: middle" color="hk-red"></ion-icon>
+    </ion-col>
+    <ion-col size="10" style="text-align: left; font-size: 16px">
+      <ion-text color="hk-darkgrey">Datang : </ion-text>
+      <ion-text color="dark">{{ txtTimeArrived }}</ion-text>
+      <br>
+      <ion-text color="hk-darkgrey">Pulang : </ion-text>
+      <ion-text color="dark">{{ txtTimeReturn }}</ion-text>
+    </ion-col>
+  </ion-row>
+</ion-grid>
+
+<hr width="90%">
+
+<ion-card *ngFor="let requestData of requestDatas">
+  <ion-item lines="none" color="transparent">
+    <ion-label>{{ requestData.szactivityname }}</ion-label>
+    <ion-button shape="round" slot="end" *ngIf="requestData.szstatusid == 'ST001'" color="hk-green">
+      {{ requestData.szstatusname }}</ion-button>
+    <ion-button shape="round" slot="end" *ngIf="requestData.szstatusid == 'ST002'" color="hk-red">
+      {{ requestData.szstatusname }}</ion-button>
+    <ion-button shape="round" slot="end" *ngIf="requestData.szstatusid == 'ST003'" color="hk-yellow">
+      {{ requestData.szstatusname }}</ion-button>
+    <ion-icon name="close-circle" slot="end" color="hk-red" (click)="DeleteRequest(requestData.szactivityid)">
+    </ion-icon>
+  </ion-item>
+  <div class="ion-text-start" padding style="padding-top: 0px">
+    <ion-text>Keterangan : {{ requestData.szdesc }}</ion-text> <br>
+    <ion-text *ngIf="requestData.szactivityid == 'AC002'">Total : {{ requestData.dectotal }}</ion-text>
+    <ion-text *ngIf="requestData.szactivityid == 'AC003'"> Lokasi : {{ requestData.szLocation }} <br /> <img
+        src="{{ photo }}" class="center" /></ion-text>
+    <ion-text *ngIf="requestData.szactivityid == 'AC004'"> Lokasi : {{ requestData.szLocation }} <br /> <img
+        src="{{ photo }}" class="center" /></ion-text>
+    <ion-text *ngIf="requestData.szactivityid == 'AC005'">Total : {{ requestData.dectotal }} </ion-text>
+  </div>
+</ion-card>

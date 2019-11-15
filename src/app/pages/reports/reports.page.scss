@@ -1,0 +1,18 @@
+// .pop-over-style {
+//     min-width: 300px;
+//     --background: #15ff00;
+//     --background-color: #15ff00;
+//     // .popover-content {
+//     //     // width: 80% !important;// - this wont work or the bottom one.
+//     //     --min-width: 730px;
+//     // }
+// }
+
+ion-segment {
+  width: 80%;
+  height: 25px;
+}
+
+ion-segment-button {
+  min-height: 25px;
+}

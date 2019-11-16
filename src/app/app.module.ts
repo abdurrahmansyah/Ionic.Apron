@@ -16,14 +16,15 @@ import { HttpClientModule } from '@angular/common/http';
 
 import { Camera } from '@ionic-native/camera/ngx';
 import { File } from '@ionic-native/file/ngx';
+import { FileTransfer, FileTransferObject } from '@ionic-native/file-transfer/ngx';
 
 export let InjectorInstance: Injector;
 
 @NgModule({
   declarations: [AppComponent],
   entryComponents: [],
-  imports: [BrowserModule, 
-    IonicModule.forRoot(), 
+  imports: [BrowserModule,
+    IonicModule.forRoot(),
     AppRoutingModule,
     HttpClientModule,
     IonicStorageModule.forRoot(
@@ -38,13 +39,12 @@ export let InjectorInstance: Injector;
     Geolocation,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     Camera,
-    File
+    File, FileTransfer, FileTransferObject
   ],
   bootstrap: [AppComponent]
 })
 export class AppModule {
-  constructor(private injector: Injector) 
-  {
+  constructor(private injector: Injector) {
     InjectorInstance = this.injector;
   }
 }

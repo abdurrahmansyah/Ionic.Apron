@@ -7,6 +7,9 @@ import { PopoverController, AlertController, NavController, Platform, IonRouterO
 import { Observable } from 'rxjs/Observable';
 import { GlobalService, ActivityId, DateData, ReportData } from '../services/global.service';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
+import { Camera, CameraOptions } from '@ionic-native/camera/ngx';
+import { File } from '@ionic-native/file/ngx';
+import { FileTransfer, FileUploadOptions, FileTransferObject } from '@ionic-native/file-transfer/ngx';
 
 @Component({
   selector: 'app-home',
@@ -21,6 +24,11 @@ export class HomePage {
   public txtTimeReturn: string = "";
   public txtWorkStatus: string = "";
   public colorStatus: string;
+  public photos: any = [];
+  private image: any;
+
+  public response: any;
+  public unknowPersonsNumber: number;
 
   constructor(public navCtrl: NavController, public alertController: AlertController,
     public router: Router,
@@ -29,12 +37,17 @@ export class HomePage {
     public popoverController: PopoverController,
     private globalService: GlobalService,
     private platform: Platform,
-    private statusBar: StatusBar
+    private statusBar: StatusBar,
+    private camera: Camera,
+    private file: File,
+    private transfer: FileTransfer,
   ) {
     this.InitializeApp();
     this.InitializeData();
     this.Timer();
   }
+
+  private fileTransfer: FileTransferObject = this.transfer.create();
 
   InitializeApp() {
     this.platform.ready().then(() => {
@@ -139,7 +152,8 @@ export class HomePage {
 
   async ButtonAbsen() {
     try {
-      this.GetUserPositionThenValidateAbsen();
+      this.GetUserPosition();
+      this.ValidateAbsen();
     }
     catch (e) {
       this.alertController.create({
@@ -152,15 +166,13 @@ export class HomePage {
     }
   }
 
-  private GetUserPositionThenValidateAbsen() {
+  private GetUserPosition() {
     var options: GeolocationOptions = {
       enableHighAccuracy: true
     };
     this.geolocation.getCurrentPosition(options).then((pos: Geoposition) => {
       this.globalService.geoLatitude = pos.coords.latitude;
       this.globalService.geoLongitude = pos.coords.longitude;
-
-      this.ValidateAbsen();
     }, (err: PositionError) => {
       console.log("error : " + err.message);
     });
@@ -169,48 +181,147 @@ export class HomePage {
   ValidateAbsen() {
     var dateData = this.globalService.GetDate();
 
-    if (this.globalService.geoLatitude <= -6.24508 && this.globalService.geoLatitude >= -6.24587 && this.globalService.geoLongitude >= 106.87269 && this.globalService.geoLongitude <= 106.87379) {
-      var reportData = new ReportData();
-      var szActivityId: string;
+    this.TakePhotos();
 
-      if (!this.txtTimeArrived) {
-        reportData.timeArrived = dateData.szHour + ":" + dateData.szMinute + ":" + dateData.decSec;
-        reportData.timeReturn = "00:00:00";
-        this.DoingAbsen(dateData, reportData);
-        this.GetTimeWorkingAndStatusUser();
-        this.globalService.dateRequest = dateData.date.toLocaleDateString();
+    // if (this.globalService.geoLatitude <= -6.24508 && this.globalService.geoLatitude >= -6.24587 && this.globalService.geoLongitude >= 106.87269 && this.globalService.geoLongitude <= 106.87379) {
+    //   this.TakePhotos();
 
-        if (reportData.timeArrived > "08:10:00") {
-          szActivityId = ActivityId.AC002;
-          let navigationExtras: NavigationExtras = {
-            state: {
-              indexForm: szActivityId
-            }
+    //   var reportData = new ReportData();
+    //   var szActivityId: string;
+
+    //   if (!this.txtTimeArrived) {
+    //     reportData.timeArrived = dateData.szHour + ":" + dateData.szMinute + ":" + dateData.decSec;
+    //     reportData.timeReturn = "00:00:00";
+    //     this.DoingAbsen(dateData, reportData);
+    //     this.GetTimeWorkingAndStatusUser();
+    //     this.globalService.dateRequest = dateData.date.toLocaleDateString();
+
+    //     if (reportData.timeArrived > "08:10:00") {
+    //       szActivityId = ActivityId.AC002;
+    //       let navigationExtras: NavigationExtras = {
+    //         state: {
+    //           indexForm: szActivityId
+    //         }
+    //       }
+    //       this.GetDecisionFromUser(szActivityId, navigationExtras);
+    //     }
+    //   }
+    // }
+    // else {
+    //   this.globalService.dateRequest = dateData.date.toLocaleDateString();
+    //   this.globalService.timeRequest = dateData.szHour + ":" + dateData.szMinute + " " + dateData.szAMPM;
+
+    //   if (!this.txtTimeArrived) {
+    //     this.globalService.isArrived = true;
+    //     szActivityId = ActivityId.AC003;
+    //   }
+    //   else {
+    //     this.globalService.isArrived = false;
+    //     szActivityId = ActivityId.AC004;
+    //   }
+
+    //   let navigationExtras: NavigationExtras = {
+    //     state: {
+    //       indexForm: szActivityId
+    //     }
+    //   }
+    //   this.GetDecisionFromUser(szActivityId, navigationExtras);
+    // }
+  }
+
+  ChooseImage() {
+    const options: CameraOptions = {
+      quality: 100,
+      sourceType: this.camera.PictureSourceType.PHOTOLIBRARY,
+      destinationType: this.camera.DestinationType.FILE_URI,
+      encodingType: this.camera.EncodingType.JPEG,
+      mediaType: this.camera.MediaType.PICTURE
+    }
+    this.camera.getPicture(options).then((imageData) => {
+      // imageData is either a base64 encoded string or a file URI
+      // If it's base64 (DATA_URL):
+      // let base64Image = 'data:image/jpeg;base64,' + imageData;
+    }, (err) => {
+      // Handle error
+    });
+  }
+
+  private TakePhotos() {
+    const options: CameraOptions = {
+      quality: 100,
+      mediaType: this.camera.MediaType.PICTURE,
+      destinationType: this.camera.DestinationType.FILE_URI,
+      sourceType: this.camera.PictureSourceType.CAMERA,
+      encodingType: this.camera.EncodingType.JPEG,
+      targetWidth: 500,
+      targetHeight: 500,
+      allowEdit: true,
+      saveToPhotoAlbum: true
+    }
+
+    this.camera.getPicture(options).then((imageData) => {
+      // this.photos = 'data:image/jpeg;base64,' + imageData;
+      this.image = imageData.split("?", 1)[0];
+      this.GetPerson();
+
+      let filename = imageData.substring(imageData.lastIndexOf('/') + 1);
+      let path = imageData.substring(0, imageData.lastIndexOf('/') + 1);
+      this.file.readAsDataURL(path, filename).then((base64Data) => {
+        this.photos.push(base64Data);
+      })
+    }, (err) => {
+      alert("ERROR");
+    });
+  }
+
+  private GetPerson() {
+    var url: string = "https://face-recognition-lica.herokuapp.com/upload_image";
+
+    this.unknowPersonsNumber = 0;
+    this.response = [];
+
+    let options: FileUploadOptions = {
+      fileKey: 'file'
+    }
+
+    this.fileTransfer.upload(this.image, url, options)
+      .then(res => {
+
+        this.response = JSON.parse(res.response);
+
+        this.response = this.response[0].response;
+
+        if (typeof this.response == 'string') {
+          if (this.response.includes("An error")) {
+            alert(this.response);
+          } else {
+            this.response = [this.response];
           }
-          this.GetDecisionFromUser(szActivityId, navigationExtras);
         }
-      }
-    }
-    else {
-      this.globalService.dateRequest = dateData.date.toLocaleDateString();
-      this.globalService.timeRequest = dateData.szHour + ":" + dateData.szMinute + " " + dateData.szAMPM;
 
-      if (!this.txtTimeArrived) {
-        this.globalService.isArrived = true;
-        szActivityId = ActivityId.AC003;
-      }
-      else {
-        this.globalService.isArrived = false;
-        szActivityId = ActivityId.AC004;
-      }
+        this.response.forEach(val => {
+          if (val == 'Unknow person') {
+            this.unknowPersonsNumber += 1;
+          }
+        });
 
-      let navigationExtras: NavigationExtras = {
-        state: {
-          indexForm: szActivityId
-        }
-      }
-      this.GetDecisionFromUser(szActivityId, navigationExtras);
-    }
+        this.response = this.response.filter(value => {
+          return value != 'Unknow person'
+        });
+
+        let lengthBefore = this.response.length;
+
+        this.response = this.response.filter((value, index, array) => {
+          return array.indexOf(value) == index;
+        });
+
+        this.unknowPersonsNumber += lengthBefore - this.response.length;
+
+      }, err => {
+        // loading.dismiss();
+        // this.displayErrorAlert(err.message);
+        alert("ERROR");
+      })
   }
 
   private async GetDecisionFromUser(szActivityId: string, navigationExtras: NavigationExtras) {

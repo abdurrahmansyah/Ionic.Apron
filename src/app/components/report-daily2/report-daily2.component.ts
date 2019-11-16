@@ -50,6 +50,6 @@ export class ReportDaily2Component implements OnInit {
   }
   
   public DeleteRequest(szActivityId: string) {
-    this.globalService.CloseRequestData(this.globalService.userData.szUserId, new Date().toLocaleString(), szActivityId);
+    this.globalService.CloseRequestData(this.globalService.userData.szidmandor, new Date().toLocaleString(), szActivityId);
   }
 }

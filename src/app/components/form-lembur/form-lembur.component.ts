@@ -44,7 +44,7 @@ export class FormLemburComponent implements OnInit {
 
   private SaveRequestData() {
     var requestData = new RequestData();
-    requestData.szUserId = this.globalService.userData.szUserId;
+    requestData.szUserId = this.globalService.userData.szidmandor;
     requestData.dateRequest = this.globalService.dateRequest;
     requestData.szactivityid = ActivityId.AC006;
     requestData.szDesc = this.txtDesc;

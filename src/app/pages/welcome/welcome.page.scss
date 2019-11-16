@@ -1,5 +1,5 @@
 ion-slides {
-  --bullet-background-active: var(--ion-color-primary);
+  --bullet-background-active: var(--ion-color-light);
   --bullet-backcground: var(--ion-color-hk-yellow-tint);
 
   background-color: var(--ion-color-hakuy-dongker);
@@ -47,10 +47,15 @@ ion-slide {
   h2 {
     font-size: 32px;
     font-weight: bold;
+    color: var(--ion-color-light);
 
     @media screen and (min-width:1024px) {
       font-size: 32px;
     }
+  }
+
+  p {
+    color: var(--ion-color-light);
   }
 
   // background-image: url("../../../assets/images/bg-2.png");

@@ -87,21 +87,13 @@ export class GlobalService {
 
   private MappingUserData(userDataFromDb: any) {
     var userData = new UserData();
-    userData.szUserId = userDataFromDb.szuserid;
-    userData.szPassword = userDataFromDb.szpassword;
-    userData.szFullName = userDataFromDb.szfullname;
-    userData.szShortName = userDataFromDb.szshortname;
-    userData.szTitleId = userDataFromDb.sztitleid;
-    userData.szTitleName = userDataFromDb.sztitlename;
-    userData.szDivisionId = userDataFromDb.szdivisionid;
-    userData.szDivisionName = userDataFromDb.szdivisionname;
-    userData.szSectionId = userDataFromDb.szsectionid;
-    userData.szSectionName = userDataFromDb.szsectionname;
-    userData.bStatusAdmin = userDataFromDb.bstatusadmin;
-    userData.szImage = userDataFromDb.szimage;
-    userData.szEmail = userDataFromDb.szemail;
-    userData.szSuperiorUserId = userDataFromDb.szsuperioruserid;
-    userData.szSuperiorUserName = userDataFromDb.szsuperiorusername;
+    userData.szidmandor = userDataFromDb.szuserid;
+    userData.password = userDataFromDb.szpassword;
+    userData.sznamamandor = userDataFromDb.szfullname;
+    userData.szperusahaan = userDataFromDb.szdivisionid;
+    userData.sznamaproyek = userDataFromDb.szsectionid;
+    userData.szalamat = userDataFromDb.szimage;
+    userData.szjumlah = userDataFromDb.szemail;
     return userData;
   }
 
@@ -178,7 +170,7 @@ export class GlobalService {
     var months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 
     let postdata = new FormData();
-    postdata.append('szUserId', this.userData.szUserId);
+    postdata.append('szUserId', this.userData.szidmandor);
     postdata.append('dateStart', '01/01/' + currentYear);
     postdata.append('dateEnd', '12/31/' + currentYear);
 
@@ -226,7 +218,7 @@ export class GlobalService {
     var url = 'http://sihk.hutamakarya.com/apiabsen/GetRequestDatasForNotifications.php';
 
     let postdata = new FormData();
-    postdata.append('szUserId', this.userData.szUserId);
+    postdata.append('szUserId', this.userData.szidmandor);
 
     var data: any = this.httpClient.post(url, postdata);
     data.subscribe(data => {
@@ -313,21 +305,13 @@ export class GlobalService {
 }
 
 export class UserData {
-  public szUserId: string;
-  public szPassword: string;
-  public szFullName: string;
-  public szShortName: string;
-  public szTitleId: string;
-  public szTitleName: string;
-  public szDivisionId: string;
-  public szDivisionName: string;
-  public szSectionId: string;
-  public szSectionName: string;
-  public bStatusAdmin: boolean;
-  public szImage: string;
-  public szEmail: string;
-  public szSuperiorUserId: string;
-  public szSuperiorUserName: string;
+  public szidmandor: string;
+  public password: string;
+  public sznamamandor: string;
+  public szperusahaan: string;
+  public sznamaproyek: string;
+  public szalamat: string;
+  public szjumlah: string;
 
   constructor() { }
 }

@@ -51,7 +51,7 @@ export class HomePage {
     var url = 'http://sihk.hutamakarya.com/apiabsen/GetReportDatas.php';
     let postdata = new FormData();
 
-    postdata.append('szUserId', this.globalService.userData.szUserId);
+    postdata.append('szUserId', this.globalService.userData.szidmandor);
     postdata.append('dateStart', date.toLocaleString());
     postdata.append('dateEnd', date.toLocaleString());
 
@@ -299,7 +299,7 @@ export class HomePage {
   }
 
   private DoingAbsen(dateData: DateData, reportData: ReportData) {
-    reportData.szUserId = this.globalService.userData.szUserId;
+    reportData.szUserId = this.globalService.userData.szidmandor;
     reportData.dateAbsen = dateData.date.toDateString();
     this.globalService.SaveReportData(reportData);
   }

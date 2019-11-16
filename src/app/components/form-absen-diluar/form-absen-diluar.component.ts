@@ -66,7 +66,7 @@ export class FormAbsenDiluarComponent implements OnInit {
 
   private SaveRequestData(szActivityId: string) {
     var requestData = new RequestData();
-    requestData.szUserId = this.globalService.userData.szUserId;
+    requestData.szUserId = this.globalService.userData.szidmandor;
     requestData.dateRequest = this.globalService.dateRequest;
     requestData.szactivityid = szActivityId;
     requestData.szDesc = this.txtDesc;
@@ -84,7 +84,7 @@ export class FormAbsenDiluarComponent implements OnInit {
     reportData.timeValidArrived = timeArrived;
     reportData.timeReturn = timeReturn;
     reportData.timeValidReturn = timeReturn;
-    reportData.szUserId = this.globalService.userData.szUserId;
+    reportData.szUserId = this.globalService.userData.szidmandor;
     reportData.dateAbsen = this.globalService.dateRequest;
     this.globalService.SaveReportData(reportData);
   }

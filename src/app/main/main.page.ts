@@ -34,10 +34,10 @@ export class MainPage implements OnInit {
   ];
 
   selectedPath: number;
-  public txtUserId: string;
-  public txtUserName: string;
-  public txtDivisionName: string;
-  public txtSectionName: string;
+  public txtjumlah: string;
+  public txtnamamandor: string;
+  public txtperusahaan: string;
+  public txtnamaproyek: string;
 
   constructor(private router: Router,
     private authService: AuthenticationService,
@@ -52,10 +52,10 @@ export class MainPage implements OnInit {
   }
 
   private ShowFirstLoadData() {
-    this.txtUserId = this.globalService.userData.szUserId;
-    this.txtUserName = this.globalService.userData.szFullName;
-    this.txtDivisionName = this.globalService.userData.szDivisionName;
-    this.txtSectionName = this.globalService.userData.szSectionName;
+    this.txtnamamandor = this.globalService.userData.sznamamandor;
+    this.txtperusahaan = this.globalService.userData.szperusahaan;
+    this.txtnamaproyek = this.globalService.userData.sznamaproyek;
+    this.txtjumlah = this.globalService.userData.szjumlah;
   }
 
   ngOnInit() { 

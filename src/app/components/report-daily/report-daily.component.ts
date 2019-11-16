@@ -94,8 +94,8 @@ export class ReportDailyComponent implements OnInit {
     var date = this.decCurrentYear + "/" + this.decCurrentMonth + "/" + this.decCurrentDay;
     
     this.globalService.dateRequest = date;
-    this.globalService.GetRequestDatasByUserId(this.globalService.userData.szUserId, date);
-    this.globalService.GetReportData(this.globalService.userData.szUserId, date);
+    this.globalService.GetRequestDatasByUserId(this.globalService.userData.szidmandor, date);
+    this.globalService.GetReportData(this.globalService.userData.szidmandor, date);
   }
 
   next() {

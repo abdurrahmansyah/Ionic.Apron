@@ -139,8 +139,7 @@ export class HomePage {
 
   async ButtonAbsen() {
     try {
-      this.GetUserPosition();
-      this.ValidateAbsen();
+      this.GetUserPositionThenValidateAbsen();
     }
     catch (e) {
       this.alertController.create({
@@ -153,13 +152,15 @@ export class HomePage {
     }
   }
 
-  private GetUserPosition() {
+  private GetUserPositionThenValidateAbsen() {
     var options: GeolocationOptions = {
       enableHighAccuracy: true
     };
     this.geolocation.getCurrentPosition(options).then((pos: Geoposition) => {
       this.globalService.geoLatitude = pos.coords.latitude;
       this.globalService.geoLongitude = pos.coords.longitude;
+
+      this.ValidateAbsen();
     }, (err: PositionError) => {
       console.log("error : " + err.message);
     });
@@ -181,34 +182,6 @@ export class HomePage {
 
         if (reportData.timeArrived > "08:10:00") {
           szActivityId = ActivityId.AC002;
-          let navigationExtras: NavigationExtras = {
-            state: {
-              indexForm: szActivityId
-            }
-          }
-          this.GetDecisionFromUser(szActivityId, navigationExtras);
-        }
-      }
-      else {
-        reportData.timeArrived = "00:00:00";
-        reportData.timeReturn = dateData.szHour + ":" + dateData.szMinute + ":" + dateData.decSec;
-        this.DoingAbsen(dateData, reportData);
-        this.GetTimeWorkingAndStatusUser();
-        this.globalService.dateRequest = dateData.date.toLocaleDateString();
-
-        if (reportData.timeReturn < "17:00:00") {
-          //mengarahkan ke component form-pulang-cepat
-          szActivityId = ActivityId.AC005
-          let navigationExtras: NavigationExtras = {
-            state: {
-              indexForm: szActivityId
-            }
-          }
-          this.GetDecisionFromUser(szActivityId, navigationExtras);
-        }
-        else if (reportData.timeReturn > "17:45:00") {
-          //mengarahkan ke component form-lembur
-          szActivityId = ActivityId.AC006
           let navigationExtras: NavigationExtras = {
             state: {
               indexForm: szActivityId

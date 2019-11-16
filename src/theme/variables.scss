@@ -11,6 +11,14 @@
   --ion-color-hakuy-dongker-shade: #092037;
   --ion-color-hakuy-dongker-tint: #233a52;
 
+  /** hakuy-white-dongker **/
+  --ion-color-hakuy-white-dongker: #ffffff;
+  --ion-color-hakuy-white-dongker-rgb: 255, 255, 255;
+  --ion-color-hakuy-white-dongker-contrast: #0a243f;
+  --ion-color-hakuy-white-dongker-contrast-rgb: 234, 34, 39;
+  --ion-color-hakuy-white-dongker-shade: #233a52;
+  --ion-color-hakuy-white-dongker-tint: #ffffff;
+
   /** hk-darkgrey **/
   --ion-color-hk-darkgrey: #4d4d4d;
   --ion-color-hk-darkgrey-rgb: 77, 77, 77;
@@ -303,6 +311,15 @@ ion-alert {
   --ion-color-contrast-rgb: var(--ion-color-hakuy-dongker-contrast-rgb);
   --ion-color-shade: var(--ion-color-hakuy-dongker-shade);
   --ion-color-tint: var(--ion-color-hakuy-dongker-tint);
+}
+
+.ion-color-hakuy-white-dongker {
+  --ion-color-base: var(--ion-color-hakuy-white-dongker);
+  --ion-color-base-rgb: var(--ion-color-hakuy-white-dongker-rgb);
+  --ion-color-contrast: var(--ion-color-hakuy-white-dongker-contrast);
+  --ion-color-contrast-rgb: var(--ion-color-hakuy-white-dongker-contrast-rgb);
+  --ion-color-shade: var(--ion-color-hakuy-white-dongker-shade);
+  --ion-color-tint: var(--ion-color-hakuy-white-dongker-tint);
 }
 
 .ion-color-hk-red {

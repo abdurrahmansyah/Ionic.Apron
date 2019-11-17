@@ -8,7 +8,11 @@
 </ion-header>
 
 <ion-content style="height: 100%">
-  <ion-row justify-content-center style="padding: 5px">
+
+  <app-report-daily></app-report-daily>
+  <app-report-daily2></app-report-daily2>
+
+  <!-- <ion-row justify-content-center style="padding: 5px">
     <ion-segment (ionChange)="SegmentChanged()" [(ngModel)]="segment" color="hk-purple" mode="ios" shape="round">
       <ion-segment-button value="0">
         <ion-label>Harian</ion-label>
@@ -39,5 +43,5 @@
     <ion-slide style="display: block;">
       <app-report-monthly></app-report-monthly>
     </ion-slide>
-  </ion-slides>
+  </ion-slides> -->
 </ion-content>

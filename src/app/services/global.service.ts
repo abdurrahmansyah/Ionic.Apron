@@ -22,6 +22,7 @@ export class GlobalService {
   public userData: UserData = new UserData();
   public geoLatitude: number;
   public geoLongitude: number;
+  public jumlahInsiden: number = 0;
 
   httpClient = InjectorInstance.get<HttpClient>(HttpClient);
   dataimage: any;
@@ -62,16 +63,18 @@ export class GlobalService {
   }
 
   public GetUserData(szUserId: string, szPassword: string) {
-    var url = 'http://sihk.hutamakarya.com/apiabsen/GetUserData.php';
+    var url = 'http://sihk.hutamakarya.com/apiabsen/apron/login.php';
 
     let postdata = new FormData();
-    postdata.append('szUserId', szUserId);
-    postdata.append('szPassword', szPassword);
+    postdata.append('szidmandor', szUserId);
+    postdata.append('password', szPassword);
 
     var data: any = this.httpClient.post(url, postdata);
     data.subscribe(data => {
       if (data.error == false) {
         var userDataFromDb = data.result.find(x => x);
+        console.log(userDataFromDb);
+
         var userData = this.MappingUserData(userDataFromDb);
 
         this.storage.set('userData', userData);
@@ -87,14 +90,36 @@ export class GlobalService {
 
   private MappingUserData(userDataFromDb: any) {
     var userData = new UserData();
-    userData.szidmandor = userDataFromDb.szuserid;
-    userData.password = userDataFromDb.szpassword;
-    userData.sznamamandor = userDataFromDb.szfullname;
-    userData.szperusahaan = userDataFromDb.szdivisionid;
-    userData.sznamaproyek = userDataFromDb.szsectionid;
-    userData.szalamat = userDataFromDb.szimage;
-    userData.szjumlah = userDataFromDb.szemail;
+    userData.szidmandor = userDataFromDb.szidmandor;
+    userData.password = userDataFromDb.password;
+    userData.sznamamandor = userDataFromDb.sznamamandor;
+    userData.szperusahaan = userDataFromDb.szperusahaan;
+    userData.sznamaproyek = userDataFromDb.sznamaproyek;
+    userData.szalamat = userDataFromDb.szalamat;
+    userData.szjumlah = userDataFromDb.szjumlah;
     return userData;
+  }
+
+  public SaveImage(imageData: any) {
+    var url = 'http://sihk.hutamakarya.com/apiabsen/apron/SaveImage.php';
+    let postdata = new FormData();
+    postdata.append('image', imageData);
+
+    var data: Observable<any> = this.httpClient.post(url, postdata);
+    data.subscribe(data => { });
+  }
+
+  SavePekerja(pekerjaData: PekerjaData) {
+    var url = 'http://sihk.hutamakarya.com/apiabsen/apron/SavePekerja.php';
+    let postdata = new FormData();
+    postdata.append('szidpekerja', pekerjaData.szidpekerja);
+    postdata.append('sznamapekerja', pekerjaData.sznamapekerja);
+    postdata.append('szidmandor', pekerjaData.szidmandor);
+    postdata.append('szimage', pekerjaData.szimage);
+
+    var data: Observable<any> = this.httpClient.post(url, postdata);
+    data.subscribe(data => { });
+    this.PresentToast("Berhasil menambahkan pekerja baru");
   }
 
   public SaveReportData(reportData: ReportData) {
@@ -201,16 +226,82 @@ export class GlobalService {
 
   public GetRequestDatasByUserId(szUserId: string, dateRequest: string) {
     this.requestDatas = [];
-    var url = 'http://sihk.hutamakarya.com/apiabsen/GetRequestDatas.php';
+    var url = 'http://sihk.hutamakarya.com/apiabsen/apron/GetImage.php';
 
     let postdata = new FormData();
-    postdata.append('szUserId', szUserId);
-    postdata.append('dateRequest', dateRequest);
 
     var data: any = this.httpClient.post(url, postdata);
     data.subscribe(data => {
-      if (data.error == false) { this.requestDatas = data.result; }
+      if (data.error == false) {
+        var index = 0;
+        data.result.forEach(img => {
+          index = this.MappingReqDatas(index, img);
+        });
+      }
+      else {
+        console.log("Tidak ada yang dapat ditampilkan");
+      }
     });
+  }
+
+  private MappingReqDatas(index: number, img: any) {
+    index += 1;
+    if (index == 1) {
+      var requestData = new RequestData();
+      requestData.namaPekerja = "Susanto Akbar Hadi";
+      requestData.szStatusId = StatusId.ST002;
+      requestData.szReasonImage = 'data:image/jpeg;base64,' + img.image;
+      requestData.statusInsiden = false;
+      this.requestDatas.push(requestData);
+    }
+    if (index == 2) {
+      var requestData = new RequestData();
+      requestData.namaPekerja = "M. Mahmud";
+      requestData.szStatusId = StatusId.ST001;
+      requestData.szReasonImage = 'data:image/jpeg;base64,' + img.image;
+      requestData.statusInsiden = false;
+      this.requestDatas.push(requestData);
+    }
+    if (index == 3) {
+      var requestData = new RequestData();
+      requestData.namaPekerja = "Pariyaman";
+      requestData.szStatusId = StatusId.ST002;
+      requestData.szReasonImage = 'data:image/jpeg;base64,' + img.image;
+      requestData.statusInsiden = false;
+      this.requestDatas.push(requestData);
+    }
+    if (index == 4) {
+      var requestData = new RequestData();
+      requestData.namaPekerja = "Agustinus A";
+      requestData.szStatusId = StatusId.ST002;
+      requestData.szReasonImage = 'data:image/jpeg;base64,' + img.image;
+      requestData.statusInsiden = false;
+      this.requestDatas.push(requestData);
+    }
+    if (index == 5) {
+      var requestData = new RequestData();
+      requestData.namaPekerja = "Mikel Ammar";
+      requestData.szStatusId = StatusId.ST001;
+      requestData.szReasonImage = 'data:image/jpeg;base64,' + img.image;
+      requestData.statusInsiden = false;
+      this.requestDatas.push(requestData);
+    }
+    if (index == 6) {
+      var requestData = new RequestData();
+      requestData.namaPekerja = "Bin Hadid";
+      requestData.szStatusId = StatusId.ST001;
+      requestData.szReasonImage = 'data:image/jpeg;base64,' + img.image;
+      requestData.statusInsiden = false;
+      this.requestDatas.push(requestData);
+    }
+    // else {
+    //   var requestData = new RequestData();
+    //   requestData.namaPekerja = "Burhanuddin";
+    //   requestData.szStatusId = StatusId.ST001;
+    //   requestData.szReasonImage = 'data:image/jpeg;base64,' + img.image;
+    //   this.requestDatas.push(requestData);
+    // }
+    return index;
   }
 
   public GetRequestDatasForNotifications(szUserId: string) {
@@ -316,6 +407,17 @@ export class UserData {
   constructor() { }
 }
 
+export class PekerjaData {
+  public szidmandor: string;
+  public sznamamandor: string;
+  public sznamaproyek: string;
+  public szidpekerja: string;
+  public sznamapekerja: string;
+  public szimage: string;
+
+  constructor() { }
+}
+
 export class DateData {
   public date: Date;
   public szDay: string;
@@ -354,7 +456,7 @@ export class SummaryReportData {
 }
 
 export class RequestData {
-  public szRequestId: string;
+  public namaPekerja: string;
   public szUserId: string;
   public szUserName: string;
   public dateRequest: string;
@@ -371,6 +473,7 @@ export class RequestData {
   public szSuperiorUserName: string; // cek dipakek bener ga
   public timeArrived: string; // cek dipakek bener ga
   public timeBack: string; // cek dipakek bener ga
+  public statusInsiden: boolean; // cek dipakek bener ga
 }
 
 export class ActivityId {

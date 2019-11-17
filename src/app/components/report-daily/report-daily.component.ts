@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { IonSlides } from '@ionic/angular';
-import { GlobalService } from 'src/app/services/global.service';
+import { IonSlides, LoadingController } from '@ionic/angular';
+import { GlobalService, RequestData, ActivityId, StatusId } from 'src/app/services/global.service';
 
 @Component({
   selector: 'app-report-daily',
@@ -21,7 +21,7 @@ export class ReportDailyComponent implements OnInit {
     speed: 400
   };
 
-  constructor(private globalService: GlobalService) {
+  constructor(private globalService: GlobalService, private loadingController: LoadingController) {
     this.GetRequestDatasForThisDay();
   }
 
@@ -80,7 +80,7 @@ export class ReportDailyComponent implements OnInit {
           element.fill = "solid";
         }
         if (element.date == this.decCurrentDay) {
-          element.color = "dark";
+          element.color = "hakuy-dongker";
           element.fill = "clear";
         }
       });
@@ -90,12 +90,22 @@ export class ReportDailyComponent implements OnInit {
     }
   }
 
-  async GetRequestDatasForThisDay() {
+  GetRequestDatasForThisDay() {
     var date = this.decCurrentYear + "/" + this.decCurrentMonth + "/" + this.decCurrentDay;
-    
+
     this.globalService.dateRequest = date;
+    // this.MappingDummyDataByDate();
+    this.PresentLoading();
+
     this.globalService.GetRequestDatasByUserId(this.globalService.userData.szidmandor, date);
-    this.globalService.GetReportData(this.globalService.userData.szidmandor, date);
+  }
+
+  private MappingDummyDataByDate() {
+    var requestData = new RequestData();
+    requestData.namaPekerja = "Susanto";
+    requestData.szStatusId = StatusId.ST001;
+
+    this.globalService.requestDatas.push(requestData);
   }
 
   next() {
@@ -104,6 +114,13 @@ export class ReportDailyComponent implements OnInit {
 
   prev() {
     this.sliderMonth.slidePrev();
+  }
+
+  async PresentLoading() {
+    const loading = await this.loadingController.create({
+      mode: 'ios'
+    });
+    await loading.present();
   }
 }
 

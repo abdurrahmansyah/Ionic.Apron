@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget id="io.ionic.starter" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>Absen HK</name>
-    <description>Hutama Karya Mobile Absensi.</description>
-    <author email="abdurrahmansyah234@gmail.com" href="http://www.hutamakarya.com/id">Hutama Karya Mobile Absensi</author>
+    <name>Apron</name>
+    <description>Absensi Proyek Online.</description>
+    <author email="abdurrahmansyah234@gmail.com" href="http://dch.ptpp.co.id/">Absensi Proyek Online</author>
     <content src="index.html" />
     <access origin="*" />
     <allow-intent href="http://*/*" />

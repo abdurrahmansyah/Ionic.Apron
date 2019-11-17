@@ -3,9 +3,9 @@ import { HttpClient } from '@angular/common/http';
 
 import { Geolocation, GeolocationOptions, Geoposition, PositionError } from '@ionic-native/geolocation/ngx';
 import { Component } from '@angular/core';
-import { PopoverController, AlertController, NavController, Platform, IonRouterOutlet } from '@ionic/angular';
+import { PopoverController, AlertController, NavController, Platform, IonRouterOutlet, LoadingController, ToastController } from '@ionic/angular';
 import { Observable } from 'rxjs/Observable';
-import { GlobalService, ActivityId, DateData, ReportData } from '../services/global.service';
+import { GlobalService, ActivityId, DateData, ReportData, PekerjaData } from '../services/global.service';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
 import { Camera, CameraOptions } from '@ionic-native/camera/ngx';
 import { File } from '@ionic-native/file/ngx';
@@ -25,10 +25,13 @@ export class HomePage {
   public txtWorkStatus: string = "";
   public colorStatus: string;
   public photos: any = [];
+  public jumlahInsiden: number = 0;
   private image: any;
 
   public response: any;
   public unknowPersonsNumber: number;
+
+  private deletedInt: number = 1;
 
   constructor(public navCtrl: NavController, public alertController: AlertController,
     public router: Router,
@@ -41,6 +44,8 @@ export class HomePage {
     private camera: Camera,
     private file: File,
     private transfer: FileTransfer,
+    public loadingController: LoadingController,
+    private toastController: ToastController
   ) {
     this.InitializeApp();
     this.InitializeData();
@@ -59,67 +64,9 @@ export class HomePage {
     await this.globalService.GetUserDataFromStorage();
   }
 
-  private GetTimeWorkingAndStatusUser() {
-    var date = new Date();
-    var url = 'http://sihk.hutamakarya.com/apiabsen/GetReportDatas.php';
-    let postdata = new FormData();
-
-    postdata.append('szUserId', this.globalService.userData.szidmandor);
-    postdata.append('dateStart', date.toLocaleString());
-    postdata.append('dateEnd', date.toLocaleString());
-
-    var data: Observable<any> = this.http.post(url, postdata);
-    data.subscribe(data => {
-      if (data.error == false) {
-        var reportDataFromDb = data.result.find(x => x);
-        var reportData = this.MappingReportData(reportDataFromDb);
-
-        var timeValidArrived = reportData.timeValidArrived.split(':');
-        var { hour, minute, ampm } = this.ConvertTimeToViewFormat(timeValidArrived);
-        this.txtTimeArrived = hour + ":" + minute + " " + ampm;
-
-        var timeValidBack = reportData.timeValidReturn.split(':');
-        var { hour, minute, ampm } = this.ConvertTimeToViewFormat(timeValidBack);
-        this.txtTimeReturn = hour == 0 && minute == 0 ? "" : hour + ":" + minute + " " + ampm;
-
-        if (this.txtTimeReturn != "")
-          this.globalService.timeRequest = this.txtTimeReturn;
-        else
-          this.globalService.timeRequest = this.txtTimeArrived;
-      }
-      else {
-        this.txtTimeArrived = "";
-        this.txtTimeReturn = "";
-      }
-
-      this.SetStatusWork();
-    });
-  }
-
-  private MappingReportData(reportDataFromDb: any) {
-    var reportData = new ReportData();
-    reportData.szUserId = reportDataFromDb.szuserid;
-    reportData.dateAbsen = reportDataFromDb.dateabsen;
-    reportData.timeArrived = reportDataFromDb.timearrived;
-    reportData.timeValidArrived = reportDataFromDb.timevalidarrived;
-    reportData.timeReturn = reportDataFromDb.timereturn;
-    reportData.timeValidReturn = reportDataFromDb.timevalidreturn;
-    reportData.decMonth = reportDataFromDb.decmonth;
-
-    return reportData;
-  }
-
-  private ConvertTimeToViewFormat(timeFromDb: any) {
-    var hour = timeFromDb[0]; // < 10 && timeFromDb[0] != 0 ? "0" + timeFromDb[0] : timeFromDb[0];
-    var minute = timeFromDb[1]; // < 10 && timeFromDb[1] != 0 ? "0" + timeFromDb[1] : timeFromDb[1];
-    var ampm = timeFromDb[2] > 12 ? "PM" : "AM";
-    return { hour, minute, ampm };
-  }
-
   private Timer() {
     setInterval(function () {
       this.ShowRepeatData();
-      // this.GetTimeWorkingAndStatusUser();
     }.bind(this), 500);
   }
 
@@ -128,6 +75,7 @@ export class HomePage {
 
     this.txtDayNow = dateData.szDay + ", " + dateData.decDate + " " + dateData.szMonth + " " + dateData.decYear;
     this.txtTimeNow = this.CheckTime(dateData.decHour) + ":" + this.CheckTime(dateData.decMinute) + ":" + this.CheckTime(dateData.decSec) + " " + dateData.szAMPM;
+    this.jumlahInsiden = this.globalService.jumlahInsiden;
   }
 
   private CheckTime(i: any) {
@@ -137,13 +85,8 @@ export class HomePage {
     return i;
   }
 
-  ionViewWillEnter() {
-    this.GetTimeWorkingAndStatusUser();
-  }
-
   DoRefresh(event: any) {
     this.InitializeData();
-    this.GetTimeWorkingAndStatusUser();
 
     setTimeout(() => {
       event.target.complete();
@@ -173,60 +116,21 @@ export class HomePage {
     this.geolocation.getCurrentPosition(options).then((pos: Geoposition) => {
       this.globalService.geoLatitude = pos.coords.latitude;
       this.globalService.geoLongitude = pos.coords.longitude;
+      console.log(pos.coords);
+
     }, (err: PositionError) => {
       console.log("error : " + err.message);
     });
   }
 
   ValidateAbsen() {
-    var dateData = this.globalService.GetDate();
-
-    this.TakePhotos();
-
-    // if (this.globalService.geoLatitude <= -6.24508 && this.globalService.geoLatitude >= -6.24587 && this.globalService.geoLongitude >= 106.87269 && this.globalService.geoLongitude <= 106.87379) {
-    //   this.TakePhotos();
-
-    //   var reportData = new ReportData();
-    //   var szActivityId: string;
-
-    //   if (!this.txtTimeArrived) {
-    //     reportData.timeArrived = dateData.szHour + ":" + dateData.szMinute + ":" + dateData.decSec;
-    //     reportData.timeReturn = "00:00:00";
-    //     this.DoingAbsen(dateData, reportData);
-    //     this.GetTimeWorkingAndStatusUser();
-    //     this.globalService.dateRequest = dateData.date.toLocaleDateString();
-
-    //     if (reportData.timeArrived > "08:10:00") {
-    //       szActivityId = ActivityId.AC002;
-    //       let navigationExtras: NavigationExtras = {
-    //         state: {
-    //           indexForm: szActivityId
-    //         }
-    //       }
-    //       this.GetDecisionFromUser(szActivityId, navigationExtras);
-    //     }
-    //   }
-    // }
-    // else {
-    //   this.globalService.dateRequest = dateData.date.toLocaleDateString();
-    //   this.globalService.timeRequest = dateData.szHour + ":" + dateData.szMinute + " " + dateData.szAMPM;
-
-    //   if (!this.txtTimeArrived) {
-    //     this.globalService.isArrived = true;
-    //     szActivityId = ActivityId.AC003;
-    //   }
-    //   else {
-    //     this.globalService.isArrived = false;
-    //     szActivityId = ActivityId.AC004;
-    //   }
-
-    //   let navigationExtras: NavigationExtras = {
-    //     state: {
-    //       indexForm: szActivityId
-    //     }
-    //   }
-    //   this.GetDecisionFromUser(szActivityId, navigationExtras);
-    // }
+    if (this.globalService.geoLatitude >= -6.305325 && this.globalService.geoLatitude <= -6.302507 && this.globalService.geoLongitude >= 106.853389 && this.globalService.geoLongitude <= 106.859000) {
+      // this.GetDataPekerja("PPB1.001.001");
+      this.TakePhotos();
+    }
+    else {
+      throw new Error("Diluar lokasi proyek");
+    }
   }
 
   ChooseImage() {
@@ -247,6 +151,7 @@ export class HomePage {
   }
 
   private TakePhotos() {
+    this.photos = [];
     const options: CameraOptions = {
       quality: 100,
       mediaType: this.camera.MediaType.PICTURE,
@@ -260,7 +165,6 @@ export class HomePage {
     }
 
     this.camera.getPicture(options).then((imageData) => {
-      // this.photos = 'data:image/jpeg;base64,' + imageData;
       this.image = imageData.split("?", 1)[0];
       this.GetPerson();
 
@@ -270,11 +174,12 @@ export class HomePage {
         this.photos.push(base64Data);
       })
     }, (err) => {
-      alert("ERROR");
+      this.PresentAlert("Gagal ambil gambar");
     });
   }
 
   private GetPerson() {
+    this.PresentLoading();
     var url: string = "https://face-recognition-lica.herokuapp.com/upload_image";
 
     this.unknowPersonsNumber = 0;
@@ -288,7 +193,6 @@ export class HomePage {
       .then(res => {
 
         this.response = JSON.parse(res.response);
-
         this.response = this.response[0].response;
 
         if (typeof this.response == 'string') {
@@ -296,6 +200,8 @@ export class HomePage {
             alert(this.response);
           } else {
             this.response = [this.response];
+            this.loadingController.dismiss();
+            this.GetDataPekerja(this.response[0]);
           }
         }
 
@@ -318,77 +224,125 @@ export class HomePage {
         this.unknowPersonsNumber += lengthBefore - this.response.length;
 
       }, err => {
-        // loading.dismiss();
-        // this.displayErrorAlert(err.message);
-        alert("ERROR");
+        this.loadingController.dismiss();
+        this.PresentAlert("Gagal lakukan face recognition");
       })
   }
 
-  private async GetDecisionFromUser(szActivityId: string, navigationExtras: NavigationExtras) {
-    await this.alertController.create({
+  async PresentLoading() {
+    const loading = await this.loadingController.create({
+      mode: 'ios'
+    });
+    await loading.present();
+  }
+
+  private GetDataPekerja(szidpekerja: string) {
+    var url = 'http://sihk.hutamakarya.com/apiabsen/apron/getdatakaryawan.php';
+
+    let postdata = new FormData();
+    postdata.append('szidpekerja', szidpekerja);
+
+    var data: any = this.http.post(url, postdata);
+    data.subscribe(data => {
+      if (data.error == false) {
+        var pekerjaDataFromDb = data.result.find(x => x);
+
+        var pekerjaData = this.MappingPekerjaData(pekerjaDataFromDb);
+        this.ReturnAlertInfoPekerja(pekerjaData);
+      }
+      else {
+        alert("GAGAL DI GET DATA KARYAWAN");
+      }
+    });
+  }
+
+  private MappingPekerjaData(pekerjaDataFromDb: any) {
+    var pekerjaData = new PekerjaData();
+    pekerjaData.szidmandor = pekerjaDataFromDb.szidmandor;
+    pekerjaData.sznamamandor = pekerjaDataFromDb.sznamamandor;
+    pekerjaData.sznamaproyek = pekerjaDataFromDb.sznamaproyek;
+    pekerjaData.szidpekerja = pekerjaDataFromDb.szidpekerja;
+    pekerjaData.sznamapekerja = pekerjaDataFromDb.sznamapekerja;
+    return pekerjaData;
+  }
+
+  private ReturnAlertInfoPekerja(pekerjaData: PekerjaData) {
+    this.alertController.create({
       mode: 'ios',
-      message: 'This is an alert message.',
-      cssClass: szActivityId == ActivityId.AC001 ? 'alert-ontime' :
-        szActivityId == ActivityId.AC003 || szActivityId == ActivityId.AC004 ? 'alert-diluarkantor' :
-          szActivityId == "DILUAR-WIFIAKSES" ? 'alert-wifiakses' :
-            szActivityId == ActivityId.AC006 ? 'alert-lembur' :
-              szActivityId == ActivityId.AC002 ? 'alert-terlambat' :
-                szActivityId == ActivityId.AC005 ? 'alert-pulangcepat' :
-                  'alert-pulang',
-      buttons: szActivityId == ActivityId.AC003 || szActivityId == ActivityId.AC004 ? [{
-        text: 'BACK',
-        role: 'Cancel'
+      message: 'Apakah benar anda?',
+      inputs: [
+        {
+          value: 'Nama Pekerja : ' + pekerjaData.sznamapekerja,
+          disabled: true
+        }, {
+          value: 'Nama Mandor : ' + pekerjaData.sznamamandor,
+          disabled: true
+        }, {
+          value: 'Nama Proyek : ' + pekerjaData.sznamaproyek,
+          disabled: true
+        },
+      ],
+      // message: 'Nama Pekerja: ' + pekerjaData.sznamapekerja + '</br> Nama mandor: ' + pekerjaData.sznamamandor + '</br> Nama Proyek: ' + pekerjaData.sznamaproyek,
+      buttons: [{
+        text: 'RETRY',
+        handler: () => {
+          this.TakePhotos();
+        }
       }, {
         text: 'NEXT',
         handler: () => {
-          this.router.navigate(['form-request'], navigationExtras);
+          this.ReturnAlertIsiKodeAPD(pekerjaData.sznamapekerja);
         }
-      }] :
-        szActivityId == "DILUAR-WIFIAKSES" ? [{
-          text: 'BACK',
-          role: 'Cancel'
-        }] : szActivityId == ActivityId.AC002 ||
-          szActivityId == ActivityId.AC005 ||
-          szActivityId == ActivityId.AC006 ? [{
-            text: 'NO',
-            role: 'Cancel'
-          }, {
-            text: 'YES',
-            handler: () => {
-              this.router.navigate(['form-request'], navigationExtras);
-            }
-          }] : [{
-            text: 'OK',
-            role: 'Cancel'
-          }]
+      }]
     }).then(alert => {
       return alert.present();
     });
   }
 
-  private SetStatusWork() {
-    if (!this.txtTimeArrived) {
-      this.txtWorkStatus = "Not Working";
-      this.colorStatus = "danger";
-    }
-    else {
-      if (this.txtTimeReturn == "") {
-        this.txtWorkStatus = "Working";
-        this.colorStatus = "primary";
-      } else {
-        this.txtWorkStatus = "Not Working";
-        this.colorStatus = "danger";
-      }
-    }
+  private ReturnAlertIsiKodeAPD(sznamapekerja: string) {
+    this.alertController.create({
+      mode: 'ios',
+      message: 'Masukkan kode APD',
+      inputs: [
+        {
+          placeholder: 'Kode APD'
+        }
+      ],
+      buttons: [{
+        text: 'CANCEL',
+        role: 'cancel'
+      }, {
+        text: 'NEXT',
+        handler: () => {
+          this.PresentToast("Berhasil melakukan absen: '" + sznamapekerja + "'");
+        }
+      }]
+    }).then(alert => {
+      return alert.present();
+    });
   }
 
-  private DoingAbsen(dateData: DateData, reportData: ReportData) {
-    reportData.szUserId = this.globalService.userData.szidmandor;
-    reportData.dateAbsen = dateData.date.toDateString();
-    this.globalService.SaveReportData(reportData);
+  private PresentAlert(msg: string) {
+    this.alertController.create({
+      mode: 'ios',
+      message: msg,
+      buttons: ['OK']
+    }).then(alert => {
+      return alert.present();
+    });
   }
 
-  NavigateToReportPage(indexReport: string) {
+  async PresentToast(msg: string) {
+    const toast = await this.toastController.create({
+      message: msg,
+      duration: 2000,
+      mode: "ios",
+      position: "top"
+    });
+    toast.present();
+  }
+
+  public NavigateToReportPage(indexReport: string) {
     let navigationExtras: NavigationExtras = {
       state: {
         indexReport: indexReport

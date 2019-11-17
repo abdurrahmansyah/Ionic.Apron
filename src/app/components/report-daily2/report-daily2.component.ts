@@ -3,6 +3,7 @@ import { GlobalService, RequestData } from 'src/app/services/global.service';
 import { HttpClient } from '@angular/common/http';
 import { Storage } from '@ionic/storage';
 import { Observable } from 'rxjs';
+import { LoadingController, AlertController } from '@ionic/angular';
 
 
 @Component({
@@ -19,9 +20,12 @@ export class ReportDaily2Component implements OnInit {
 
   constructor(
     private globalService: GlobalService,
-    public http: HttpClient,
-    private storage: Storage) {
+    private http: HttpClient,
+    private storage: Storage,
+    private loadingController: LoadingController,
+    private alertController: AlertController) {
     this.GetLoopRequestDatas();
+    this.PresentLoading();
   }
 
   ngOnInit() { }
@@ -33,23 +37,32 @@ export class ReportDaily2Component implements OnInit {
   }
 
   async GetRequestDatas() {
-    // var szUserId = await this.storage.get('szUserId').then((x) => { return x; });
-    // this.globalService.GetRequestDatasByUserId(szUserId,new Date().toLocaleString())
-
     this.requestDatas = this.globalService.requestDatas;
-    this.txtTimeArrived = this.globalService.timeArrived;
-    this.txtTimeReturn = this.globalService.timeReturn;
-    var i = 0;
-    // console.log(this.requestDatas);
-    if (!this.requestDatas.map(x => x.szreasonimage).find(x => x) || this.requestDatas.map(x => x.szreasonimage).find(x => x) == "undefined") {
-      this.photo = "";
-    } else {
-      this.photo = 'data:image/jpeg;base64,' + this.requestDatas.map(x => x.szreasonimage).find(x => x);
-      console.log();
-    }
+    if (this.requestDatas.length > 0)
+      this.loadingController.dismiss();
   }
-  
-  public DeleteRequest(szActivityId: string) {
-    this.globalService.CloseRequestData(this.globalService.userData.szidmandor, new Date().toLocaleString(), szActivityId);
+
+  async PresentLoading() {
+    const loading = await this.loadingController.create({
+      mode: 'ios'
+    });
+    await loading.present();
+  }
+
+  public IsAnyIncident(namaPekerja: string) {
+    this.alertController.create({
+      mode: 'ios',
+      message: 'Apakah ' + namaPekerja + ' mengalami insiden hari ini?',
+      buttons: [{
+        text: 'NO'
+      }, {
+        text: 'YES',
+        handler: () => {
+          this.globalService.jumlahInsiden += 1;
+        }
+      }]
+    }).then(alert => {
+      return alert.present();
+    });
   }
 }

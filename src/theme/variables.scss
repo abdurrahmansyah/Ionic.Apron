@@ -3,6 +3,14 @@
 
 /** Ionic CSS Variables **/
 :root {
+  /** hakuy-pink **/
+  --ion-color-hakuy-pink: #ff0081;
+  --ion-color-hakuy-pink-rgb: 255,0,129;
+  --ion-color-hakuy-pink-contrast: #ffffff;
+  --ion-color-hakuy-pink-contrast-rgb: 255,255,255;
+  --ion-color-hakuy-pink-shade: #e00072;
+  --ion-color-hakuy-pink-tint: #ff1a8e;
+
   /** hakuy-dongker **/
   --ion-color-hakuy-dongker: #0a243f;
   --ion-color-hakuy-dongker-rgb: 10, 36, 63;
@@ -302,6 +310,15 @@ ion-alert {
       color: var(--ion-color-hk-red);
     }
   }
+}
+
+.ion-color-hakuy-pink {
+  --ion-color-base: var(--ion-color-hakuy-pink);
+  --ion-color-base-rgb: var(--ion-color-hakuy-pink-rgb);
+  --ion-color-contrast: var(--ion-color-hakuy-pink-contrast);
+  --ion-color-contrast-rgb: var(--ion-color-hakuy-pink-contrast-rgb);
+  --ion-color-shade: var(--ion-color-hakuy-pink-shade);
+  --ion-color-tint: var(--ion-color-hakuy-pink-tint);
 }
 
 .ion-color-hakuy-dongker {
